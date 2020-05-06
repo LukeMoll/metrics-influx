@@ -3,6 +3,7 @@ import platform
 import subprocess
 import os
 from pprint import pp
+import influxdb
 
 def main():
     pp(get_data())
@@ -24,7 +25,7 @@ def get_config(fn):
     return config
 
 def get_data():
-    return {
+    return [{
         'tags': {
             'hostname': platform.node()
         },
@@ -32,7 +33,7 @@ def get_data():
             **run_uptime(),
             **run_df()
         }
-    }
+    }]
 
 def run_uptime():
     a = os.getloadavg()
@@ -54,17 +55,17 @@ def run_df():
 def influx_write(data, config):
     try:
         client = influxdb.InfluxDBClient(
-            config['host'], 
-            config.get('port', 8086), 
-            config['username'], 
-            config['password'], 
-            config['database'], 
+            config['influxdb']['host'], 
+            config['influxdb'].get('port', 8086), 
+            config['influxdb']['username'], 
+            config['influxdb']['password'], 
+            config['influxdb']['database'], 
             ssl=True
         )
     except KeyError as e:
         print("Missing {} section/value in {}".format(e, config_fn))
         exit(1)
-    for datum in data: datum['measurement'] = measurement
+    for datum in data: datum['measurement'] = config['influxdb']['measurement']
     client.write_points(data)
 
 if __name__ == "__main__":
