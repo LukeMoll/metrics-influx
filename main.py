@@ -49,7 +49,7 @@ def run_df():
     for line in p.stdout.decode('UTF-8').splitlines()[1:]:
         fields = line.split()
         results[fields[0]] = fields[3]
-    return dict(map(lambda t: ('df'+t[0].replace('/','_'), t[1]), results.items()))
+    return dict(map(lambda t: ('df'+t[0].replace('/','_'), int(t[1])), results.items()))
 
 
 def influx_write(data, config):
